@@ -23,6 +23,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,7 +51,11 @@ fun TopPanel(onNavigateTo: (Int, String?, String?) -> Unit) {
             .fillMaxWidth()
             .height(56.dp)
             .background(if (isDarkTheme) Color(0xFF2C2C2E) else Color(0xFFF8F8F8))
-            .border(width = 2.dp, color = if (isDarkTheme) Color(0x4D9E9E9E) else Color(0x809E9E9E), shape = RoundedCornerShape(0.dp))
+            .border(
+                width = 2.dp,
+                color = if (isDarkTheme) Color(0x4D9E9E9E) else Color(0x809E9E9E),
+                shape = RoundedCornerShape(0.dp)
+            )
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
@@ -89,6 +95,9 @@ fun SettingsScreen(
     var isDarkMode by remember { mutableStateOf(isDarkTheme) }
 
     val context = LocalContext.current
+    val rootManager = remember { RootManager(context) }
+    var isRootModeEnabled by remember { mutableStateOf(rootManager.isRootModeEnabled()) }
+
 
     TopPanel(onNavigateTo = onNavigateTo)
 
@@ -118,18 +127,28 @@ fun SettingsScreen(
                     }
                 )
             }
-//            SettingItemWithArrow(
-//                label = stringResource(R.string.appearance),
-//                onNavigateTo = {
-//                    isDarkMode = !isDarkMode
-//                },
-//                iconRes = if (isDarkMode) R.drawable.style_d else R.drawable.style
-//            )
+
             SettingItemWithArrow(
                 label = stringResource(R.string.sending_collected_data),
                 onNavigateTo = { onNavigateTo(7, state.Uuid, state.JwtToken) },
                 iconRes = if (isDarkMode) R.drawable.s_data_d else R.drawable.s_data
             )
+
+            // TODO заменить иконку, переместить текст в strings
+
+            SettingItemWithSwitch(
+                label = "Root Mode",
+                isChecked = isRootModeEnabled,
+                onCheckedChange = { enabled ->
+                    isRootModeEnabled = enabled
+                    rootManager.setRootModeEnabled(enabled)
+                    if (enabled) {
+                        rootManager.requestRootAccess()
+                    }
+                },
+                iconRes = if (isDarkMode) R.drawable.ic_launcher_foreground else R.drawable.ic_launcher_foreground
+            )
+
             Spacer(modifier = Modifier.weight(1f))
         }
     }
@@ -162,7 +181,11 @@ fun LanguageDropdownMenu(
                 modifier = Modifier
                     .size(100.dp)
                     .background(if (isDarkTheme) Color(0xFF2C2C2E) else Color(0xFFF8F8F8))
-                    .border(1.dp, if (isDarkTheme) Color(0x4D9E9E9E) else Color(0x809E9E9E), RoundedCornerShape(8.dp))
+                    .border(
+                        1.dp,
+                        if (isDarkTheme) Color(0x4D9E9E9E) else Color(0x809E9E9E),
+                        RoundedCornerShape(8.dp)
+                    )
                     .padding(8.dp)
             ) {
                 languages.forEach { language ->
@@ -200,7 +223,7 @@ fun LanguageOption(
             text = label,
             modifier = Modifier.weight(1f),
             fontSize = 16.sp,
-            color =  if (isDarkTheme) Color(0xCCFFFFFF) else Color(0xFF34204C),
+            color = if (isDarkTheme) Color(0xCCFFFFFF) else Color(0xFF34204C),
         )
     }
 }
@@ -224,7 +247,11 @@ fun SettingItemWithArrow(label: String, onNavigateTo: () -> Unit, iconRes: Int) 
             .fillMaxWidth()
             .padding(vertical = 8.dp)
             .background(if (isDarkTheme) Color(0xFF2C2C2E) else Color(0xFFF8F8F8))
-            .border(width = 1.5.dp, color = if (isDarkTheme) Color(0x4D9E9E9E) else Color(0x809E9E9E), shape = RoundedCornerShape(8.dp))
+            .border(
+                width = 1.5.dp,
+                color = if (isDarkTheme) Color(0x4D9E9E9E) else Color(0x809E9E9E),
+                shape = RoundedCornerShape(8.dp)
+            )
             .padding(16.dp)
             .clickable { onNavigateTo() },
         verticalAlignment = Alignment.CenterVertically
@@ -249,6 +276,54 @@ fun SettingItemWithArrow(label: String, onNavigateTo: () -> Unit, iconRes: Int) 
             contentDescription = "Перейти",
             tint = if (isDarkTheme) Color(0xCCFFFFFF) else Color(0xFF34204C),
             modifier = Modifier.size(24.dp)
+        )
+    }
+}
+
+
+@Composable
+fun SettingItemWithSwitch(
+    label: String,
+    isChecked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    iconRes: Int
+) {
+    val isDarkTheme = isSystemInDarkTheme()
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .background(if (isDarkTheme) Color(0xFF2C2C2E) else Color(0xFFF8F8F8))
+            .border(
+                width = 1.5.dp,
+                color = if (isDarkTheme) Color(0x4D9E9E9E) else Color(0x809E9E9E),
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            painter = painterResource(id = iconRes),
+            contentDescription = label,
+            modifier = Modifier.size(24.dp)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            text = label,
+            color = if (isDarkTheme) Color(0xCCFFFFFF) else Color(0xFF34204C),
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Normal,
+            modifier = Modifier.weight(1f)
+        )
+        Switch(
+            checked = isChecked,
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = if (isDarkTheme) Color.White else Color(0xFF34204C),
+                checkedTrackColor = if (isDarkTheme) Color(0xFF888888) else Color(0xFF8EC3F8),
+                uncheckedThumbColor = if (isDarkTheme) Color.Gray else Color.LightGray,
+                uncheckedTrackColor = if (isDarkTheme) Color(0xFF444444) else Color.Gray,
+            )
         )
     }
 }

@@ -34,6 +34,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.CancellationTokenSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -47,7 +48,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 object DataManager {
     private const val LOCATION_PERMISSION_REQUEST_CODE = 1001
@@ -331,6 +331,12 @@ object DataManager {
             latitude = state.Latitude.toDoubleOrNull() ?: 0.0,
             longitude = state.Longtitude.toDoubleOrNull() ?: 0.0,
             altitude = state.Altitude.toDoubleOrNull() ?: 0.0,
+            manufacturer = Build.MANUFACTURER,
+            model = Build.MODEL,
+            androidVersion = Build.VERSION.RELEASE,
+            hardware = Build.HARDWARE,
+            product = Build.PRODUCT,
+            board = Build.BOARD,
             operator = state.Operator,
             cdma = CdmaData(cellInfoDataByType["CDMA"] ?: emptyList()),
             gsm = GsmData(cellInfoDataByType["GSM"] ?: emptyList()),
@@ -751,6 +757,12 @@ object DataManager {
                         put("latitude", messageToData2.latitude)
                         put("longitude", messageToData2.longitude)
                         put("altitude", messageToData2.altitude)
+                        put("manufacturer", messageToData2.manufacturer)
+                        put("model", messageToData2.model)
+                        put("androidVersion", messageToData2.androidVersion)
+                        put("hardware", messageToData2.hardware)
+                        put("product", messageToData2.product)
+                        put("board", messageToData2.board)
                         put("operator", messageToData2.operator)
 
                         if (messageToData2.cdma.cellInfoList.isNotEmpty()) {
@@ -833,9 +845,28 @@ object DataManager {
     }
 
     private suspend fun sendFileToServer(file: File): Boolean {
-        return suspendCoroutine { continuation ->
+        return suspendCancellableCoroutine { continuation ->
+            var isCallbackHandled = false
+
+            val callback = { success: Boolean ->
+                if (!isCallbackHandled) {
+                    isCallbackHandled = true
+                    if (continuation.isActive) {
+                        continuation.resume(success)
+                    }
+                }
+            }
+
             MainActivity.networkManager.sendMessageToServerFromFile(file.absolutePath) { success ->
-                continuation.resume(success)
+                callback(success)
+            }
+
+            continuation.invokeOnCancellation {
+                if (!isCallbackHandled) {
+                    isCallbackHandled = true
+                    MainActivity.networkManager.webSocket?.close(1000, "Cancelled")
+                    callback(false)
+                }
             }
         }
     }

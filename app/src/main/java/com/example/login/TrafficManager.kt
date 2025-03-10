@@ -18,6 +18,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,6 +37,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -50,6 +52,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -59,9 +62,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
-import androidx.compose.ui.res.stringResource
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.ButtonDefaults
 
 
 @Composable
@@ -186,6 +186,7 @@ fun TotalHourlyTrafficChart(onClose: () -> Unit, context: Context, selectedDate:
 fun TotalHourlyTrafficChartContent(hourlyTrafficData: List<Pair<Int, AppTrafficData>>, selectedDate: Calendar? = null) {
     val scrollState = rememberScrollState()
     val hourWidth = 50.dp
+    val isDarkTheme = isSystemInDarkTheme()
 
     val filteredHourlyTrafficData = if (selectedDate != null) {
         (0..23).map { hour ->
@@ -218,7 +219,7 @@ fun TotalHourlyTrafficChartContent(hourlyTrafficData: List<Pair<Int, AppTrafficD
                         y,
                         android.graphics.Paint().apply {
                             textSize = 10.sp.toPx()
-                            color = android.graphics.Color.BLACK
+                            color = if (isDarkTheme) android.graphics.Color.LTGRAY else android.graphics.Color.DKGRAY
                             textAlign = android.graphics.Paint.Align.LEFT
                         }
                     )
@@ -252,7 +253,7 @@ fun TotalHourlyTrafficChartContent(hourlyTrafficData: List<Pair<Int, AppTrafficD
                         size.height - barHeight - 15.dp.toPx(),
                         android.graphics.Paint().apply {
                             textSize = 9.sp.toPx()
-                            color = android.graphics.Color.BLACK
+                            color = if (isDarkTheme) android.graphics.Color.LTGRAY else android.graphics.Color.DKGRAY
                             textAlign = android.graphics.Paint.Align.CENTER
                             typeface = Typeface.DEFAULT_BOLD
                         }
@@ -264,7 +265,7 @@ fun TotalHourlyTrafficChartContent(hourlyTrafficData: List<Pair<Int, AppTrafficD
                         size.height - barHeight - 3.dp.toPx(),
                         android.graphics.Paint().apply {
                             textSize = 8.sp.toPx()
-                            color = android.graphics.Color.BLACK
+                            color = if (isDarkTheme) android.graphics.Color.LTGRAY else android.graphics.Color.DKGRAY
                             textAlign = android.graphics.Paint.Align.CENTER
                         }
                     )
@@ -275,7 +276,7 @@ fun TotalHourlyTrafficChartContent(hourlyTrafficData: List<Pair<Int, AppTrafficD
                         size.height + 15f,
                         android.graphics.Paint().apply {
                             textSize = 10.sp.toPx()
-                            color = android.graphics.Color.BLACK
+                            color = if (isDarkTheme) android.graphics.Color.LTGRAY else android.graphics.Color.DKGRAY
                             textAlign = android.graphics.Paint.Align.CENTER
                         }
                     )
@@ -290,6 +291,7 @@ fun TotalHourlyTrafficChartContent(hourlyTrafficData: List<Pair<Int, AppTrafficD
 fun TotalHourlyTrafficLineChartContent(hourlyTrafficData: List<Pair<Int, AppTrafficData>>, topAppNames: List<String>, selectedDate: Calendar? = null) {
     val scrollState = rememberScrollState()
     val hourWidth = 60.dp
+    val isDarkTheme = isSystemInDarkTheme()
 
     val filteredHourlyTrafficData = if (selectedDate != null) {
         (0..23).map { hour ->
@@ -340,7 +342,7 @@ fun TotalHourlyTrafficLineChartContent(hourlyTrafficData: List<Pair<Int, AppTraf
                     y,
                     android.graphics.Paint().apply {
                         textSize = 8.sp.toPx()
-                        color = android.graphics.Color.BLACK
+                        color = if (isDarkTheme) android.graphics.Color.LTGRAY else android.graphics.Color.DKGRAY
                         textAlign = android.graphics.Paint.Align.LEFT
                     }
                 )
@@ -423,7 +425,7 @@ fun TotalHourlyTrafficLineChartContent(hourlyTrafficData: List<Pair<Int, AppTraf
                     legendY.toPx() + 8.dp.toPx(),
                     android.graphics.Paint().apply {
                         textSize = 8.sp.toPx()
-                        color = android.graphics.Color.BLACK
+                        color = if (isDarkTheme) android.graphics.Color.LTGRAY else android.graphics.Color.DKGRAY
                         textAlign = android.graphics.Paint.Align.LEFT
                     }
                 )
@@ -444,7 +446,7 @@ fun TotalHourlyTrafficLineChartContent(hourlyTrafficData: List<Pair<Int, AppTraf
                             legendY.toPx() + 8.dp.toPx(),
                             android.graphics.Paint().apply {
                                 textSize = 8.sp.toPx()
-                                color = android.graphics.Color.BLACK
+                                color = if (isDarkTheme) android.graphics.Color.LTGRAY else android.graphics.Color.DKGRAY
                                 textAlign = android.graphics.Paint.Align.LEFT
                             }
                         )
@@ -460,7 +462,7 @@ fun TotalHourlyTrafficLineChartContent(hourlyTrafficData: List<Pair<Int, AppTraf
                         size.height + 15f,
                         android.graphics.Paint().apply {
                             textSize = 10.sp.toPx()
-                            color = android.graphics.Color.BLACK
+                            color = if (isDarkTheme) android.graphics.Color.LTGRAY else android.graphics.Color.DKGRAY
                             textAlign = android.graphics.Paint.Align.CENTER
                         }
                     )
@@ -613,6 +615,7 @@ fun getPackageNameForApp(context: Context, appName: String): String? {
 fun HourlyTrafficChartContent(hourlyTrafficData: List<Pair<Int, Long>>, selectedDate: Calendar? = null) {
     val scrollState = rememberScrollState()
     val hourWidth = 50.dp
+    val isDarkTheme = isSystemInDarkTheme()
 
     val filteredData = if (selectedDate != null) {
         (0..23).map { hour ->
@@ -645,7 +648,7 @@ fun HourlyTrafficChartContent(hourlyTrafficData: List<Pair<Int, Long>>, selected
                         y,
                         android.graphics.Paint().apply {
                             textSize = 10.sp.toPx()
-                            color = android.graphics.Color.BLACK
+                            color = if (isDarkTheme) android.graphics.Color.LTGRAY else android.graphics.Color.DKGRAY
                             textAlign = android.graphics.Paint.Align.LEFT
                         }
                     )
@@ -689,7 +692,7 @@ fun HourlyTrafficChartContent(hourlyTrafficData: List<Pair<Int, Long>>, selected
                         size.height + 15f,
                         android.graphics.Paint().apply {
                             textSize = 10.sp.toPx()
-                            color = android.graphics.Color.BLACK
+                            color = if (isDarkTheme) android.graphics.Color.LTGRAY else android.graphics.Color.DKGRAY
                             textAlign = android.graphics.Paint.Align.CENTER
                         }
                     )
@@ -700,7 +703,7 @@ fun HourlyTrafficChartContent(hourlyTrafficData: List<Pair<Int, Long>>, selected
                         size.height - barHeight - 5.dp.toPx(),
                         android.graphics.Paint().apply {
                             textSize = 8.sp.toPx()
-                            color = android.graphics.Color.BLACK
+                            color = if (isDarkTheme) android.graphics.Color.LTGRAY else android.graphics.Color.DKGRAY
                             textAlign = android.graphics.Paint.Align.CENTER
                         }
                     )

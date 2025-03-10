@@ -12,4 +12,14 @@
 /captures
 .externalNativeBuild
 .cxx
+app/src/main/jni/
+app/src/main/jniLibs/
+app/src/main/python/
+app/src/main/assets/ns_plus_diag.cfg
+app/src/main/java/com/example/login/Constants.kt
+app/src/main/java/com/example/login/parser/
+app/src/main/java/com/example/login/util/
+app/src/main/java/com/example/login/messages/
+app/src/main/java/com/example/login/diagcmd.kt
+app/src/main/java/com/example/login/DiagLteLogParser.kt
 local.properties

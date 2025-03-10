@@ -15,10 +15,14 @@ import android.os.Build
 import android.telephony.SubscriptionManager
 import android.telephony.TelephonyManager
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,18 +37,24 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -61,9 +71,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
@@ -75,19 +89,6 @@ import java.util.Locale
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.reflect.full.declaredMemberProperties
-import androidx.compose.material3.*
-import androidx.compose.foundation.border
-import androidx.compose.ui.res.painterResource
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.Text
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.ui.res.stringResource
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -880,7 +881,7 @@ fun DetailedChartContent(
                                 textMeasurer = textMeasurer,
                                 text = String.format("%.0f", yAxisMinValue + i * stepSize),
                                 topLeft = Offset(5.dp.toPx(), y - 5.dp.toPx()),
-                                style = TextStyle(color = Color.Black, fontSize = 8.sp)
+                                style = TextStyle(color = Color.Gray, fontSize = 8.sp)
                             )
                         }
                     }
@@ -945,7 +946,7 @@ fun DetailedChartContent(
                             )
 
                             val textOffset = if (index % 2 == 0) {
-                                Offset(x, y - 10.dp.toPx())
+                                Offset(x, (y - 10.dp.toPx()).coerceAtLeast(10.dp.toPx()))
                             } else {
                                 Offset(x, y + 10.dp.toPx())
                             }
@@ -954,7 +955,7 @@ fun DetailedChartContent(
                                     textMeasurer = textMeasurer,
                                     text = String.format("%.0f", dataPoint.value),
                                     topLeft = textOffset,
-                                    style = TextStyle(color = Color.Black, fontSize = 8.sp)
+                                    style = TextStyle(color = Color.Gray, fontSize = 8.sp)
                                 )
                             }
 
@@ -973,7 +974,7 @@ fun DetailedChartContent(
                                     textMeasurer = textMeasurer,
                                     text = formattedTime,
                                     topLeft = Offset(x - 15.dp.toPx(), chartHeight.toPx() - 10.dp.toPx()),
-                                    style = TextStyle(color = Color.Black, fontSize = 6.sp)
+                                    style = TextStyle(color = Color.Gray, fontSize = 6.sp)
                                 )
                             }
 

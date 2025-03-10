@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit
 
 
 class NetworkManager<Context>(private val context: Context, private val serverUrl: String, private val webSocketEndpoint: String) {
-    private var webSocket: WebSocket? = null
+    internal var webSocket: WebSocket? = null
     private var isWebSocketConnected = false
     companion object {
         private const val TAG = "NetworkManager"
@@ -283,6 +283,12 @@ class NetworkManager<Context>(private val context: Context, private val serverUr
             put("latitude", messageToData2.latitude)
             put("longitude", messageToData2.longitude)
             put("altitude", messageToData2.altitude)
+            put("manufacturer", messageToData2.manufacturer)
+            put("model", messageToData2.model)
+            put("androidVersion", messageToData2.androidVersion)
+            put("hardware", messageToData2.hardware)
+            put("product", messageToData2.product)
+            put("board", messageToData2.board)
             put("operator", messageToData2.operator)
             put("cdma", Json.encodeToJsonElement(messageToData2.cdma.cellInfoList))
             put("wcdma", Json.encodeToJsonElement(messageToData2.wcdma.cellInfoList))
@@ -355,6 +361,14 @@ class NetworkManager<Context>(private val context: Context, private val serverUr
             return
         }
 
+        var isCompleted = false
+        val safeOnComplete = { result: Boolean ->
+            if (!isCompleted) {
+                isCompleted = true
+                onComplete?.invoke(result)
+            }
+        }
+
         if (webSocket == null || !isWebSocketConnected) {
             Log.e(TAG, "WebSocket is not initialized or not connected, attempting to connect...")
 
@@ -366,12 +380,11 @@ class NetworkManager<Context>(private val context: Context, private val serverUr
             this.webSocket = httpClient.newWebSocket(request, object : WebSocketListener() {
                 override fun onOpen(webSocket: WebSocket, response: Response) {
                     Log.d(TAG, "WebSocket connected successfully for CellInfo (from file)")
-                    sendJsonBody(jsonBody, onComplete)
+                    sendJsonBody(jsonBody, safeOnComplete)
                 }
 
                 override fun onMessage(webSocket: WebSocket, text: String) {
                     Log.d(TAG, "Received message from server CellInfo: $text")
-
                 }
 
                 override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
@@ -388,21 +401,26 @@ class NetworkManager<Context>(private val context: Context, private val serverUr
 
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
                     Log.e(TAG, "Failed to connect WebSocket for CellInfo", t)
-                    onComplete?.invoke(false)
+                    safeOnComplete(false)
                 }
             })
             this.isWebSocketConnected = this.webSocket != null
         } else {
             Log.d(TAG, "Sending CellInfo through existing WebSocket connection")
-            sendJsonBody(jsonBody, onComplete)
+            sendJsonBody(jsonBody, safeOnComplete)
         }
     }
 
-    private fun sendJsonBody(jsonBody: String, onComplete: ((Boolean) -> Unit)?) {
-        this.webSocket?.send(jsonBody)
-        Log.d(TAG, "Sent CellInfo (from networkmanager): $jsonBody")
-        onComplete?.invoke(true)
-        (context as? MainActivity)?.showSendingIndicator()
+    private fun sendJsonBody(jsonBody: String, onComplete: (Boolean) -> Unit) {
+        try {
+            this.webSocket?.send(jsonBody)
+            Log.d(TAG, "Sent CellInfo (from networkmanager): $jsonBody")
+            onComplete(true)
+            (context as? MainActivity)?.showSendingIndicator()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to send WebSocket message", e)
+            onComplete(false)
+        }
     }
 
     /* Способ отправки JSON на сервер с помощью multipart/form-data   */

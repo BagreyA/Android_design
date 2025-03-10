@@ -18,6 +18,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,15 +38,20 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Slider
+import androidx.compose.material.SliderDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -55,6 +62,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -62,28 +70,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
+import androidx.work.WorkManager
+import com.example.login.MainActivity.FileUploadScheduler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.*
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.style.TextAlign
-import androidx.work.WorkManager
-import com.example.login.MainActivity.FileUploadScheduler
-
-
 
 @RequiresApi(Build.VERSION_CODES.M)
 @Composable
@@ -108,7 +108,6 @@ fun TrafficScreen(state: MainActivity.MainActivityState, onNavigateTo: (Int) -> 
     var showSlider by remember { mutableStateOf(false) }
     val intervalOptions = listOf(1, 1800, 3600, 21600, 43200, 86400)
     var selectedInterval by remember { mutableStateOf(intervalOptions[0]) }
-
 
     fun onDaysChanged(newDays: String) {
         days = newDays
@@ -185,7 +184,6 @@ fun TrafficScreen(state: MainActivity.MainActivityState, onNavigateTo: (Int) -> 
         }
     }
 
-    // Функция для отображения интервала в виде строк
     fun formatInterval(intervalInSeconds: Int): String {
         return when (intervalInSeconds) {
             1 -> "1 секунда"
@@ -242,7 +240,7 @@ fun TrafficScreen(state: MainActivity.MainActivityState, onNavigateTo: (Int) -> 
                             imageVector = Icons.Filled.Close,
                             contentDescription = "Close",
                             tint = if (isDarkTheme) Color(0xCCFFFFFF) else Color(0xFF34204C)
-                            )
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -272,13 +270,13 @@ fun TrafficScreen(state: MainActivity.MainActivityState, onNavigateTo: (Int) -> 
 
                 Button(
                     onClick = {
-                        WorkManager.getInstance(context).cancelAllWork() // Cancel existing worker
+                        WorkManager.getInstance(context).cancelAllWork()
                         FileUploadScheduler.scheduleFileUpload(selectedInterval.toLong(), context)
                         showSlider = false
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (isDarkTheme) Color(0xFF3C3C3E) else  Color(0xFFFFFFFF)
-            ),
+                    ),
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                         .border(1.dp, color = if (isDarkTheme) Color(0x809E9E9E) else Color(0x4D9E9E9E), RoundedCornerShape(8.dp))
@@ -376,7 +374,7 @@ fun TrafficScreen(state: MainActivity.MainActivityState, onNavigateTo: (Int) -> 
                             fontWeight = FontWeight.SemiBold,
                             color = if (isDarkTheme) Color(0xCCFFFFFF) else Color(0xFF34204C)
                         )
-                        Text(text = "${(totalTrafficData.value.totalBytes / 1024)} Kb")
+                        Text(text = "${(totalTrafficData.value.totalBytes / 1024)} Kb", color = if (isDarkTheme) Color(0xCCFFFFFF) else Color(0xFF34204C))
                     }
 
                     Spacer(modifier = Modifier.width(8.dp))
@@ -404,9 +402,9 @@ fun TrafficScreen(state: MainActivity.MainActivityState, onNavigateTo: (Int) -> 
                         Text(
                             text = stringResource(id = R.string.mobile),
                             fontWeight = FontWeight.SemiBold,
-                            color = if (isDarkTheme) Color(0xB3FFFFFF) else Color(0xFF34204C)
+                            color = if (isDarkTheme) Color(0xCCFFFFFF) else Color(0xFF34204C)
                         )
-                        Text(text = "${(totalTrafficData.value.mobileBytes / 1024)} Kb")
+                        Text(text = "${(totalTrafficData.value.mobileBytes / 1024)} Kb", color = if (isDarkTheme) Color(0xCCFFFFFF) else Color(0xFF34204C))
                     }
 
                     Spacer(modifier = Modifier.width(8.dp))
@@ -434,9 +432,9 @@ fun TrafficScreen(state: MainActivity.MainActivityState, onNavigateTo: (Int) -> 
                         Text(
                             text = stringResource(id = R.string.wifi),
                             fontWeight = FontWeight.SemiBold,
-                            color = if (isDarkTheme) Color(0xB3FFFFFF) else Color(0xFF34204C)
+                            color = if (isDarkTheme) Color(0xCCFFFFFF) else Color(0xFF34204C)
                         )
-                        Text(text = "${(totalTrafficData.value.wifiBytes / 1024)} Kb")
+                        Text(text = "${(totalTrafficData.value.wifiBytes / 1024)} Kb", color = if (isDarkTheme) Color(0xCCFFFFFF) else Color(0xFF34204C))
                     }
                 }
             }
@@ -463,7 +461,13 @@ fun TrafficScreen(state: MainActivity.MainActivityState, onNavigateTo: (Int) -> 
                                     color = if (isDarkTheme) Color(0xD9FFFFFF) else Color(0xFF929292)
                                 )
                             },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = if (isDarkTheme) Color(0xCCFFFFFF) else Color(0xFF34204C),
+                                unfocusedTextColor = if (isDarkTheme) Color(0xCCFFFFFF) else Color(0xFF34204C),
+                                focusedBorderColor = if (isDarkTheme) Color(0xCC567BFF) else Color(0xFF132C86),
+                                unfocusedBorderColor = if (isDarkTheme) Color(0x809E9E9E) else Color(0x4D9E9E9E)
+                            )
                         )
                     }
 

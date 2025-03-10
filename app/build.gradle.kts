@@ -1,8 +1,11 @@
+import com.android.tools.build.bundletool.flags.Flag.path
+
 plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "1.7.20"
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
+    id("com.chaquo.python")
 }
 
 android {
@@ -19,12 +22,23 @@ android {
         applicationId = "com.example.login"
         minSdk = 24
         targetSdk = 34
-        versionCode = 22
-        versionName = "2.2"
+        versionCode = 23
+        versionName = "2.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
+        }
+
+        ndk {
+            abiFilters += listOf("arm64-v8a", "x86_64", "armeabi-v7a")
+        }
+
+        externalNativeBuild {
+            cmake {
+                version = "3.18.1"
+                path ("src/main/jni/CMakeLists.txt")
+            }
         }
     }
 
@@ -59,6 +73,11 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+    sourceSets {
+        getByName("main") {
+            jniLibs.srcDirs("src/main/jniLibs")
         }
     }
 }
@@ -98,6 +117,11 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.9.1")
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.work:work-runtime-ktx:2.8.1")
+    implementation ("com.jakewharton.timber:timber:5.0.1")
+    implementation ("com.google.guava:guava:32.1.3-android")
+
+    val libsuVersion = "6.0.0"
+    implementation("com.github.topjohnwu.libsu:core:$libsuVersion")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.mockito:mockito-core:4.8.0")
